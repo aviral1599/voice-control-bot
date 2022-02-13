@@ -1,0 +1,206 @@
+/* Voice controlled Robot */
+/* PLZ NOTE : the code has been hard-coded for some distances because of the incorrect serial communication b/w bluetooth and arduino . 
+Voice Commands were exact in case of serial communication b/w computer and arduino so i have to hard-code . plz excuse me for that  */
+/* Ex. when i say forward it takes the input something else mixed of symbols and characters . i tried everything but not successful */
+
+int in1 = 9; //motor1
+int in2 = 6; //motor1
+int in3 = 10; //motor2
+int in4 = 11; //motor2
+int flag = 0;
+int sensor = 13;
+unsigned long start_time = 0;
+unsigned long end_time = 0;
+int steps=0;
+float steps_old=0;
+float temp=0;
+float rps=0;
+float r;
+float radius=3;
+float c= 2*3.14*radius ;
+float t=0;
+
+void setup() 
+{
+ Serial.begin(9600);
+ pinMode(9,OUTPUT);
+ pinMode(8,OUTPUT);
+ pinMode(10,OUTPUT);
+ pinMode(11,OUTPUT);
+ pinMode(sensor,INPUT_PULLUP);
+ 
+ Serial.println(" RPS   - 0.00");
+}
+ 
+void loop()
+{
+  if (Serial.available()) {
+   flag = Serial.read();     //reading input
+    Serial.println(flag);
+
+    /* hardcoded as if we speak "forward 50" then it sends input 8(ascii code as 56) , we speak "reverse" it sends input 1(ascii value 49). etc.  */
+    
+ if (flag == 48) //stop
+ { 
+   analogWrite(9,0); 
+   analogWrite(10,0); 
+   analogWrite(6,0); 
+   analogWrite(11,0);
+ } 
+   else if (flag == 49) //reverse
+ { 
+   analogWrite(9,0); 
+   analogWrite(10,0);
+    analogWrite(6,255); 
+   analogWrite(11,255); 
+   
+   delay(1000);
+   
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0);
+   } 
+ 
+ else if (flag == 50) //left
+ { 
+   analogWrite(9,200); 
+   analogWrite(10,0); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   delay(1000);
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(8,0); 
+   analogWrite(11,0); 
+   
+ } 
+ else if (flag == 51) //right
+ { 
+   analogWrite(9,0); 
+   analogWrite(10,200); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   delay(1000);
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0);  
+  
+ } 
+ else if (flag == 52) // forward 10
+ { 
+   analogWrite(9,255); 
+   analogWrite(10,255); 
+   analogWrite(6,0); 
+   analogWrite(11,0);
+    
+    r=claculateRPM();
+    t=10/(c*r);
+   delay(t*1000);
+   
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   } 
+   
+   else if (flag == 53) //forward 20
+ { 
+   analogWrite(9,255); 
+   analogWrite(10,255); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+    r=claculateRPM();
+    t=20/(c*r);
+    delay(t*1000);
+    
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   } 
+   else if (flag == 54) //forward 30
+ { 
+   analogWrite(9,255); 
+   analogWrite(10,255); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+    r=claculateRPM();
+    t=30/(c*r);
+    delay(t*1000); 
+    
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   } 
+   else if (flag == 55) //forward 40
+ { 
+   analogWrite(9,255); 
+   analogWrite(10,255); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+    r=claculateRPM();
+    t=40/(c*r);
+    delay(t*1000);
+    
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   } 
+   else if (flag == 56) //forward 50
+ { 
+   analogWrite(9,255); 
+analogWrite(10,255); 
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+    r=claculateRPM();
+    t=50/(c*r);
+    delay(t*1000);
+    
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(6,0); 
+   analogWrite(11,0); 
+   } 
+   else if (flag == 57) //forward 100
+ { 
+   analogWrite(9,255); 
+   analogWrite(10,255); 
+   analogWrite(8,0); 
+   analogWrite(11,0); 
+    r=claculateRPM();
+    t=100/(c*r);
+    delay(t*1000);
+    
+   analogWrite(9,0); 
+   analogWrite(10,0);
+   analogWrite(8,0); 
+   analogWrite(11,0); 
+   } 
+  }
+  
+}
+
+//function to calculate rps
+float claculateRPM(){
+  start_time=millis();
+ end_time=start_time+1000;
+ while(millis()<end_time)
+ {
+   if(digitalRead(sensor))
+   {
+    steps=steps+1; 
+    while(digitalRead(sensor));
+   }
+ }
+    temp=steps-steps_old;
+    steps_old=steps;
+    rps=(temp/20);
+    
+    Serial.println(rps);
+
+    return rps;
+  }
